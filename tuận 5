@@ -1,0 +1,184 @@
+using System;
+using System.Drawing;
+using System.Drawing.Text;
+using System.IO;
+using System.Windows.Forms;
+
+namespace Lab05_01
+{
+	public partial class Form1 : Form
+	{
+		string currentFile = "";
+		bool isNewFile = true;
+
+		public Form1()
+		{
+			InitializeComponent();
+		}
+
+		// Khi mở Form
+		private void Form1_Load(object sender, EventArgs e)
+		{
+			// Load Fonts
+			InstalledFontCollection fonts = new InstalledFontCollection();
+			foreach (FontFamily font in fonts.Families)
+			{
+				cmbFonts.Items.Add(font.Name);
+			}
+
+			// Load Size
+			int[] sizes = { 8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72 };
+			foreach (int s in sizes)
+				cmbSize.Items.Add(s);
+
+			cmbFonts.Text = "Tahoma";
+			cmbSize.Text = "14";
+
+			richText.Font = new Font("Tahoma", 14);
+		}
+
+		// Đếm số từ
+		private void richText_TextChanged(object sender, EventArgs e)
+		{
+			string text = richText.Text.Trim();
+			if (text == "")
+				lblStatus.Text = "Số từ: 0";
+			else
+				lblStatus.Text = "Số từ: " + text.Split(new char[] { ' ', '\n' }, StringSplitOptions.RemoveEmptyEntries).Length;
+		}
+
+		// Tạo mới
+		private void NewFile()
+		{
+			richText.Clear();
+			cmbFonts.Text = "Tahoma";
+			cmbSize.Text = "14";
+			richText.Font = new Font("Tahoma", 14);
+
+			currentFile = "";
+			isNewFile = true;
+		}
+
+		private void mnuNew_Click(object sender, EventArgs e)
+		{
+			NewFile();
+		}
+
+		// Mở file
+		private void mnuOpen_Click(object sender, EventArgs e)
+		{
+			OpenFileDialog ofd = new OpenFileDialog();
+			ofd.Filter = "Text File (*.txt)|*.txt|Rich Text (*.rtf)|*.rtf";
+
+			if (ofd.ShowDialog() == DialogResult.OK)
+			{
+				if (Path.GetExtension(ofd.FileName) == ".rtf")
+					richText.LoadFile(ofd.FileName);
+				else
+					richText.Text = File.ReadAllText(ofd.FileName);
+
+				currentFile = ofd.FileName;
+				isNewFile = false;
+			}
+		}
+
+		// Lưu file
+		private void mnuSave_Click(object sender, EventArgs e)
+		{
+			if (isNewFile)
+			{
+				SaveFileDialog sfd = new SaveFileDialog();
+				sfd.Filter = "Rich Text (*.rtf)|*.rtf";
+
+				if (sfd.ShowDialog() == DialogResult.OK)
+				{
+					richText.SaveFile(sfd.FileName);
+					currentFile = sfd.FileName;
+					isNewFile = false;
+					MessageBox.Show("Lưu thành công!");
+				}
+			}
+			else
+			{
+				richText.SaveFile(currentFile);
+				MessageBox.Show("Lưu thành công!");
+			}
+		}
+
+		// Font Dialog
+		private void mnuFont_Click(object sender, EventArgs e)
+		{
+			FontDialog fontDlg = new FontDialog();
+			fontDlg.ShowColor = true;
+			fontDlg.ShowApply = true;
+			fontDlg.ShowEffects = true;
+			fontDlg.ShowHelp = true;
+
+			if (fontDlg.ShowDialog() != DialogResult.Cancel)
+			{
+				richText.SelectionFont = fontDlg.Font;
+				richText.SelectionColor = fontDlg.Color;
+			}
+		}
+
+		// Đổi Font
+		private void cmbFonts_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			ChangeFontStyle();
+		}
+
+		// Đổi Size
+		private void cmbSize_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			ChangeFontStyle();
+		}
+
+		// C#
+		private void ChangeFontStyle()
+		{
+			if (richText.SelectionFont == null)
+				return;
+
+			if (!float.TryParse(cmbSize.Text, out float size) || size <= 0f)
+				return; // or set a default: size = 14f;
+
+			richText.SelectionFont = new Font(cmbFonts.Text, size, richText.SelectionFont.Style);
+			}
+		
+
+		// Bold
+		private void btnBold_Click(object sender, EventArgs e)
+		{
+			ToggleFontStyle(FontStyle.Bold);
+		}
+
+		// Italic
+		private void btnItalic_Click(object sender, EventArgs e)
+		{
+			ToggleFontStyle(FontStyle.Italic);
+		}
+
+		// Underline
+		private void btnUnderline_Click(object sender, EventArgs e)
+		{
+			ToggleFontStyle(FontStyle.Underline);
+		}
+
+		private void ToggleFontStyle(FontStyle style)
+		{
+			if (richText.SelectionFont == null) return;
+
+			FontStyle newStyle = richText.SelectionFont.Style ^ style;
+			richText.SelectionFont = new Font(
+				richText.SelectionFont.FontFamily,
+				richText.SelectionFont.Size,
+				newStyle
+			);
+		}
+
+        private void Form1_Load_1(object sender, EventArgs e)
+        {
+
+        }
+    }
+}
