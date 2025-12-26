@@ -1,0 +1,58 @@
+using System;
+using System.Windows.Forms;
+
+namespace ListViewDemo
+{
+	public partial class Form1 : Form
+	{
+		public Form1()
+		{
+			InitializeComponent();
+			InitListView();
+		}
+
+		private void InitListView()
+		{
+			lvStudent.View = View.Details;
+			lvStudent.FullRowSelect = true;
+			lvStudent.GridLines = true;
+
+			lvStudent.Columns.Add("Last Name", 120);
+			lvStudent.Columns.Add("First Name", 120);
+			lvStudent.Columns.Add("Phone", 120);
+		}
+
+		// Add Name
+		private void btnAdd_Click(object sender, EventArgs e)
+		{
+			if (txtLastName.Text == "" || txtFirstName.Text == "" || txtPhone.Text == "")
+			{
+				MessageBox.Show("Vui lòng nhập đầy đủ thông tin!");
+				return;
+			}
+
+			ListViewItem item = new ListViewItem(txtLastName.Text);
+			item.SubItems.Add(txtFirstName.Text);
+			item.SubItems.Add(txtPhone.Text);
+
+			lvStudent.Items.Add(item);
+
+			txtLastName.Clear();
+			txtFirstName.Clear();
+			txtPhone.Clear();
+			txtLastName.Focus();
+		}
+
+		// Click ListView -> show to TextBox
+		private void lvStudent_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			if (lvStudent.SelectedItems.Count > 0)
+			{
+				ListViewItem item = lvStudent.SelectedItems[0];
+				txtLastName.Text = item.SubItems[0].Text;
+				txtFirstName.Text = item.SubItems[1].Text;
+				txtPhone.Text = item.SubItems[2].Text;
+			}
+		}
+	}
+}
